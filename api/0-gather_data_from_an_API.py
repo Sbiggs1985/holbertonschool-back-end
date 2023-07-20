@@ -3,36 +3,40 @@
 Write a Python script that uses REST API
 """
 
+#!/usr/bin/python3
+""" returns information about to-do list progress """
 import requests
+import sys
 
 
-def get_employee_todo_progress(employee_id):
-    base_url = 'https://jsonplaceholder.typicode.com/users'
-    todo_url = f'{base_url}/{employee_id}/todos'
+def gather_api_data():
+    """gather and print api data"""
+    if(len(sys.argv) != 2):
+        print("Error not 3 commands")
 
-    response = requests.get(todo_url)
+    employee_id = sys.argv[1]
 
-    if response.status_code != 200:
-        print(f"Error: Could not fetch data for employee ID {employee_id}")
-        return
+    user_data = requests.get('https://jsonplaceholder.typicode.com/users/{}'
+                             .format(employee_id)).json()
+    todo_data = requests.get('https://jsonplaceholder.typicode.com/todos',
+                             params={"userId": employee_id}).json()
+    EMPLOYEE_NAME = user_data.get("name")
+    NUMBER_OF_DONE_TASKS = 0
+    TOTAL_NUMBER_OF_TASKS = 0
 
-    todos = response.json()
-    employee_name = todos[0]['username']
-    total_tasks = len(todos)
-    done_tasks = sum(1 for todo in todos if todo['completed'])
+    completed_tasks = []
 
-    print(f"Employee {employee_name} is done with tasks ({done_tasks}/{total_tasks}):")
+    for item in todo_data:
+        TOTAL_NUMBER_OF_TASKS += 1
+        if item.get("completed"):
+            NUMBER_OF_DONE_TASKS += 1
+            completed_tasks.append(item.get("title"))
 
-    for todo in todos:
-        if todo['completed']:
-            print(f"\t{todo['title']}")
+    print('Employee {} is done with tasks({}/{}):'
+          .format(EMPLOYEE_NAME, NUMBER_OF_DONE_TASKS, TOTAL_NUMBER_OF_TASKS))
+    for task in completed_tasks:
+        print("\t {}".format(task))
 
 
-if __name__ == '__main__':
-    import sys
-
-    if len(sys.argv) != 2:
-        print("Usage: python script.py EMPLOYEE_ID")
-    else:
-        employee_id = int(sys.argv[1])
-        get_employee_todo_progress(employee_id)
+if __name__ == "__main__":
+    gather_api_data()
