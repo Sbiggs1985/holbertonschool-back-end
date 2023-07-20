@@ -1,4 +1,7 @@
 #!/usr/bin/python3
+"""
+Write a Python script that uses REST API
+"""
 
 import requests
 
